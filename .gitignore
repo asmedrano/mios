@@ -1,0 +1,4 @@
+*.swp
+*.pyc
+mios/settings.py
+ENV/
