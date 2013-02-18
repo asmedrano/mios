@@ -73,6 +73,26 @@ class TestData(TestCase):
         r = self.im.find({'name':'test image'})
         self.assertEqual(r[0].name, 'test image')
 
+    def test_image_update(self):
+
+        img = Image(
+            name="test image",
+            description="Yadayada",
+            tags = ['fun','sun']
+        )
+
+        img2 = Image(
+            name="test image 2",
+            description="Yadayada",
+            tags = ['fun','sun']
+        )
+
+        self.im.insert([img, img2])
+        self.im.update({'name':'test image'}, description="modified descrip")
+
+        self.assertEqual(self.im.find_one().description, "modified descrip")
+
+
     def test_image_remove(self):
 
         img = Image(

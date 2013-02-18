@@ -45,9 +45,14 @@ class ImageManager(object):
             query should be a pymongo query Dict thing {}
         """
         if query:
-            return Image(**self.images.find_one(query))
+            q_results = self.images.find_one(query)
         else:
-            return Image(**self.images.find_one())
+            q_results = self.images.find_one()
+
+        if q_results:
+            return Image(**q_results)
+        else:
+            return None
 
     def find(self, query=None):
         """ get more than a single document as the result of a query. Return Cursor instance"""
@@ -62,6 +67,13 @@ class ImageManager(object):
             for result in q_results:
                 results.append(Image(**result))
         return results
+
+    def update(self, query, **kwargs):
+        """ Update an existing Image, finding it by its id
+            query should be a valid pymongo spec
+            **kwargs are any properties in an Image
+        """
+        return self.images.update(query, {"$set":kwargs})
 
     def remove(self, img_obj):
         """ Remove One Item from the collection """
