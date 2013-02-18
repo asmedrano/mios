@@ -61,8 +61,18 @@ class ImageManager(object):
             results = []
             for result in q_results:
                 results.append(Image(**result))
-
         return results
+
+    def remove(self, img_obj):
+        """ Remove One Item from the collection """
+        if img_obj:
+            if isinstance(img_obj, Image):
+                self.images.remove(img_obj.to_dict())
+                return True
+            else:
+                raise TypeError('img_obj should be instance of Image')
+        else:
+            return False
 
     def get_count(self):
         return self.images.count()

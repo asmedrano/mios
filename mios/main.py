@@ -15,12 +15,13 @@ def index():
 def browser():
     return "Browser"
 
+
+
 @app.route("/auth/login", methods=['POST'])
 def login():
     # The request has to have an assertion for us to verify
     if 'assertion' not in request.form:
         abort(400)
-
     # Send the assertion to Mozilla's verifier service.
     data = {'assertion': request.form['assertion'], 'audience': 'http://127.0.0.1:5000'}
     resp = requests.post('https://verifier.login.persona.org/verify', data=data, verify=True)

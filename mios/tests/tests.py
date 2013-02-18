@@ -73,6 +73,29 @@ class TestData(TestCase):
         r = self.im.find({'name':'test image'})
         self.assertEqual(r[0].name, 'test image')
 
+    def test_image_remove(self):
+
+        img = Image(
+            name="test image",
+            description="Yadayada",
+            tags = ['fun','sun']
+        )
+
+        img2 = Image(
+            name="test image 2",
+            description="Yadayada",
+            tags = ['fun','sun']
+        )
+
+        self.im.insert([img, img2])
+
+        # sanity check
+        self.assertEqual(2, self.im.get_count())
+        self.im.remove(img)
+        self.assertEqual(1, self.im.get_count())
+        # remove should always take an Image obj to keep us from destroying the
+        # whole collection
+        self.assertRaises(TypeError, self.im.remove , {'a':'b'})
 
     def tearDown(self):
         self.im.images.remove() # we always clear out the test-db
