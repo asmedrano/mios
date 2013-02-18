@@ -5,28 +5,26 @@ import datetime
 
 class Image(object):
     """ a simple image model """
-    def __init__(self, name=None, description=None, published=False, tags=[]):
-        self.id = None
+    def __init__(self, _id=None, name=None, description=None, published=False, tags=[], versions=[]):
+        self._id = _id
         self.name = name
         self.description = description
-        self.created_at = None # auto generated when saved
         self.tags = tags # tags....
         self.published = published # is this picture published?
-        self.versions = [] # list of resized versions of this image
+        self.versions = versions # list of resized versions of this image
 
     def to_dict(self):
         self.created_at = datetime.datetime.today()
         d = {
             'name' : self.name,
             'description' : self.description,
-            'created_at': self.created_at,
             'tags' : self.tags,
             'published':self.published,
-            'version':self.versions
+            'versions':self.versions
         }
 
-        if self.id:
-            d['_id'] = ObjectId(self.id)
+        if self._id:
+            d['_id'] = ObjectId(self._id)
 
         return d
 
@@ -38,10 +36,6 @@ class ImageManager(object):
         self.db = self.connection[dbname]
         self.images = self.db.images
 
-    def _image_from_bson(self, bson):
-        """ Return an Image from a bson result"""
-        print bson
-
     def insert(self, image_objs):
         """ Insert one or many image objects. Image objs should be a list of image objects, ex: [img1, img2]"""
         self.images.insert([img.to_dict() for img in image_objs])
@@ -51,16 +45,24 @@ class ImageManager(object):
             query should be a pymongo query Dict thing {}
         """
         if query:
-            return self.images.find_one(query)
+            return Image(**self.images.find_one(query))
         else:
-            return self.images.find_one()
+            return Image(**self.images.find_one())
 
     def find(self, query=None):
         """ get more than a single document as the result of a query. Return Cursor instance"""
+        results = None
         if query:
-            return self.images.find(query)
+            q_results = self.images.find(query)
         else:
-            return self.images.find()
+            q_results = self.images.find()
+
+        if q_results:
+            results = []
+            for result in q_results:
+                results.append(Image(**result))
+
+        return results
 
     def get_count(self):
         return self.images.count()
