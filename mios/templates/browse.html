@@ -1,0 +1,44 @@
+{%extends "index.html" %}
+
+{%block content%}
+{%for img in images%}
+	<div class="image" id="{{img.id}}">
+		{%if user != False %}
+		<form action="/actions/update" method="post">
+		{%endif%}
+		<h4>{{img.name}}</h4>
+		<img src="{{config.MEDIA_URL}}{{img.get_file_name()}}">
+		{%if img.description and user == False%}
+			<div class="description">{{img.description}}</div>
+		{%endif%}
+		{% if user != False %}
+			<div class="description">
+				
+				<textarea name="description" rows="8" cols="40">{%if img.description%}{{img.description}}{%endif%}</textarea>
+			</div>
+		{%endif%}
+		{%if img.tags and user == False%}
+			<div class="tags">{{img.tags}}</div>
+		{%endif%}
+		{%if user != False %}
+		<div class="tags"><input type="text" name="tags" value="{{img.tags}}"></div>
+		{%endif%}
+		
+			{%if user != False %}
+			<div class="published">
+				<label>Publish</label>
+				<input type="checkbox" name="published"{%if img.published%} checked{%endif%}>
+			</div>
+			{%endif%}
+		{%if user != False %}
+			<div class="delete">
+				<label>Delete this Image</label>
+				<input type="checkbox" name="delete">
+			</div>
+			<input type="hidden" value="{{img.id}}" name="i_id">
+			<input type="submit" value="Save">
+		</form>
+		{%endif%}
+	</div>
+{%endfor%}
+{%endblock%}

@@ -9,25 +9,38 @@ class Image(object):
         self._id = _id
         self.name = name
         self.description = description
-        self.tags = tags # tags....
+        self._tags = tags # tags....
         self.published = published # is this picture published?
         self.versions = versions # list of resized versions of this image
+
+    @property
+    def id(self):
+        if self._id:
+            return ObjectId(self._id)
+        else:
+            return None
+    @property
+    def tags(self):
+        return ', '.join(self._tags)
 
     def to_dict(self):
         self.created_at = datetime.datetime.today()
         d = {
             'name' : self.name,
             'description' : self.description,
-            'tags' : self.tags,
+            'tags' : self._tags,
             'published':self.published,
-            'versions':self.versions
+            'versions':self.versions,
         }
 
         if self._id:
-            d['_id'] = ObjectId(self._id)
+            d['_id'] = self.id
 
         return d
 
+    def get_file_name(self):
+        fname, ftype = self.name.rsplit(".")
+        return fname + "_" + str(self._id) + "."+ftype
 
 class ImageManager(object):
     """ Manages the CRUD for images on disk and in mongodb"""
@@ -38,7 +51,7 @@ class ImageManager(object):
 
     def insert(self, image_objs):
         """ Insert one or many image objects. Image objs should be a list of image objects, ex: [img1, img2]"""
-        self.images.insert([img.to_dict() for img in image_objs])
+        return self.images.insert([img.to_dict() for img in image_objs])
 
     def find_one(self, query=None):
         """ Get one Image by query. Returns Image object

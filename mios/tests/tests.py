@@ -19,7 +19,6 @@ class TestData(TestCase):
             tags = ['fun','sun']
         )
 
-        self.im.insert([img])
         self.assertEqual(1, self.im.get_count())
 
     def test_image_find_one(self):
