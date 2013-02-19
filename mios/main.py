@@ -24,11 +24,19 @@ def index():
 
 @app.route("/browse")
 def browser():
+    r_query = {}
+
     user = utils.get_user_session()
-    if user is not False:
-        imgs = g.img_manager.find()
-    else:
-        imgs = g.img_manager.find({'published':True}) # grab all the published images
+
+    if user is False:
+        r_query['published'] = True
+
+    # add to query
+    tags = request.args.getlist('t')
+    if tags:
+        r_query['$and'] = [{"tags":{'$in':[tag]}} for tag in tags]
+
+    imgs = g.img_manager.find(r_query) # grab all the published images
     return render_template("browse.html", user=user, images=imgs)
 
 @app.route("/actions/upload", methods=["POST"])
