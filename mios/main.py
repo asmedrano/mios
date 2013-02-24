@@ -1,6 +1,6 @@
 import os
 from flask import Flask, render_template, request, abort, session, escape, \
-        redirect, g, abort, url_for
+        redirect, g, abort, url_for, send_file
 import simplejson as json
 import requests
 import utils
@@ -39,9 +39,37 @@ def browser():
     imgs = g.img_manager.find(r_query) # grab all the published images
     return render_template("browse.html", user=user, images=imgs)
 
+
+@app.route("/img/<fileid>")
+def serve_img(fileid):
+    # first we need to grab the image from the db
+    try:
+        img = g.img_manager.find_one({'_id':ObjectId(fileid)})
+        if img:
+
+            if img.published == True:
+                #this is a public image
+                return send_file(img.get_file_path())
+            else:
+                user = utils.get_user_session()
+                if user is False:
+                    abort(404)
+                else:
+                    # serve the image
+                    return send_file(img.get_file_path())
+
+    except Exception as err:
+        abort(500)
+    abort(404)
+
+
 @app.route("/actions/upload", methods=["POST"])
 def upload():
     """ Recieves a list of images to upload """
+    user = utils.get_user_session()
+    if user is False:
+        abort(404)
+
     if request.method == 'POST':
         for file in request.files.getlist('images'):
             utils.put_file(file, g.img_manager, app)
@@ -49,6 +77,9 @@ def upload():
 
 @app.route("/actions/update", methods=["POST"])
 def update():
+    user = utils.get_user_session()
+    if user is False:
+        abort(404)
     if request.method == 'POST':
         u_query = {}
         u_vals = {} # the values to update
@@ -90,6 +121,7 @@ def login():
     if 'assertion' not in request.form:
         abort(400)
     # Send the assertion to Mozilla's verifier service.
+    # simple check to see if email is in authorized_users
     data = {'assertion': request.form['assertion'], 'audience': 'http://127.0.0.1:5000'}
     resp = requests.post('https://verifier.login.persona.org/verify', data=data, verify=True)
     # Did the verifier respond?
@@ -99,8 +131,9 @@ def login():
         # Check if the assertion was valid
         if verification_data['status'] == 'okay':
             # Log the user in by setting a secure session cookie
-            session.update({'e': verification_data['email']})
-            return resp.content
+            if verification_data['email'] in app.config['AUTHORIZED_EMAILS']:
+                session.update({'e': verification_data['email']})
+                return resp.content
     # Oops, something failed. Abort.
     abort(500)
 

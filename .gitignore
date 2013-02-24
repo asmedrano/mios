@@ -2,4 +2,6 @@
 *.pyc
 mios/settings.py
 ENV/
-mios/static/media/
+*.jpg
+*.png
+*.gif

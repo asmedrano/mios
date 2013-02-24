@@ -7,7 +7,7 @@
 		<form action="/actions/update" method="post">
 		{%endif%}
 		<h4>{{img.name}}</h4>
-		<img src="{{config.MEDIA_URL}}{{img.get_file_name()}}">
+		<img src="/img/{{img.id}}">
 		{%if img.description and user == False%}
 			<div class="description">{{img.description}}</div>
 		{%endif%}

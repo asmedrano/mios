@@ -14,7 +14,7 @@ def allowed_file(filename, allowed):
     return '.' in filename and filename.rsplit('.', 1)[1] in allowed
 
 def put_file(file, img_manager, app):
-    """ Save file data to db and filesystem """
+    """ Save file data to db"""
     if allowed_file(file.filename, app.config['ALLOWED_EXTENSIONS']):
         filename = secure_filename(file.filename)
         img = Image(name=filename)

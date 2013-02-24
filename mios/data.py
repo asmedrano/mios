@@ -2,6 +2,7 @@ import simplejson as json
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 import datetime
+import os
 
 class Image(object):
     """ a simple image model """
@@ -41,6 +42,10 @@ class Image(object):
     def get_file_name(self):
         fname, ftype = self.name.rsplit(".")
         return fname + "_" + str(self._id) + "."+ftype
+
+    def get_file_path(self):
+        return os.path.join(os.path.dirname(__file__), 'media', self.get_file_name())
+
 
 class ImageManager(object):
     """ Manages the CRUD for images on disk and in mongodb"""
@@ -101,6 +106,9 @@ class ImageManager(object):
 
     def get_count(self):
         return self.images.count()
+
+    def get_tags(self):
+        return self.images.distinct('tags')
 
     def close_conn(self):
         self.connection.close()
